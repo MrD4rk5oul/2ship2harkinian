@@ -6,6 +6,7 @@
 
 #include "z_en_dg.h"
 #include "overlays/actors/ovl_En_Aob_01/z_en_aob_01.h"
+#include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_10 | ACTOR_FLAG_800000)
 
@@ -652,20 +653,30 @@ void EnDg_ChooseActionForForm(EnDg* this, PlayState* play) {
                 break;
 
             case PLAYER_FORM_DEKU:
-                this->dogFlags &= ~DOG_FLAG_JUMP_ATTACKING;
-                if ((this->behavior != DOG_BEHAVIOR_DEKU) && (player->actor.speed > 1.0f)) {
-                    this->behavior = DOG_BEHAVIOR_DEKU;
-                    EnDg_ChangeAnim(&this->skelAnime, sAnimationInfo, DOG_ANIM_RUN);
-                    this->actionFunc = EnDg_ApproachPlayerToAttack;
-                }
+                EnDg_Explode(this, play);
+                // this->dogFlags &= ~DOG_FLAG_JUMP_ATTACKING;
+                // if ((this->behavior != DOG_BEHAVIOR_DEKU) && (player->actor.speed > 1.0f)) {
+                //     this->behavior = DOG_BEHAVIOR_DEKU;
+                //     EnDg_ChangeAnim(&this->skelAnime, sAnimationInfo, DOG_ANIM_RUN);
+                //     this->actionFunc = EnDg_ApproachPlayerToAttack;
+                // }
 
-                if ((this->behavior != DOG_BEHAVIOR_DEKU_WAIT) && (this->behavior != DOG_BEHAVIOR_DEKU)) {
-                    this->behavior = DOG_BEHAVIOR_DEKU_WAIT;
-                    EnDg_SetupIdleMove(this, play);
-                }
+                // if ((this->behavior != DOG_BEHAVIOR_DEKU_WAIT) && (this->behavior != DOG_BEHAVIOR_DEKU)) {
+                //     this->behavior = DOG_BEHAVIOR_DEKU_WAIT;
+                //     EnDg_SetupIdleMove(this, play);
+                // }
                 break;
         }
     }
+}
+
+void EnDg_Explode(EnDg* this, PlayState* play) {
+    EnBom* bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
+                                this->actor.world.pos.y + 25.0f, this->actor.world.pos.z, 0, 0, 0, BOMB_TYPE_BODY);
+    bomb->timer = 1;
+
+    func_80123590(play, &this->actor);
+    Actor_Kill(&this->actor);
 }
 
 /**
